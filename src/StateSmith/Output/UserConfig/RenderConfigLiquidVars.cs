@@ -6,12 +6,6 @@ namespace StateSmith.Output.UserConfig;
 
 public class RenderConfigLiquidVars : RenderConfigBaseVars, IRenderConfigLiquid
 {
-    public RenderConfigLiquidVars()
-    {
-        AutoExpandedVars = new();
-    }
-
-    public AutoExpandedVarsProcessor AutoExpandedVars { get; set; }
 
     public string FeedPrefix { get; set; } = "feeds['";
     public string FeedSuffix { get; set; } = "']";

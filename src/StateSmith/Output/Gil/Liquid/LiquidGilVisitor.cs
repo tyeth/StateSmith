@@ -41,8 +41,7 @@ public class LiquidGilVisitor
     private void AppendCommentHeader()
     {
         sb.AppendLine($"{renderConfigLiquid.CommentPrefix}");
-        sb.AppendLine($"Generated Liquid Template for {renderConfig.SmName}");
-        sb.AppendLine($"StateSmith Version: {renderConfig.StateSmithVersion}");
+        sb.AppendLine($"Generated Liquid Template");
         sb.AppendLine($"Compatible with Adafruit IO Blockly Actions");
         sb.AppendLine($"{renderConfigLiquid.CommentSuffix}");
         sb.AppendLine();

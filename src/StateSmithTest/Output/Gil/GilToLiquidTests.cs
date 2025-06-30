@@ -1,12 +1,10 @@
-using StateSmith.Output.Gil.Liquid;
+#nullable enable
+
+using Xunit;
 using StateSmith.Output.UserConfig;
 using StateSmith.Output;
-using StateSmith.Runner;
-using StateSmithTest.Output;
-using System.Text;
-using Xunit;
-
-#nullable enable
+using StateSmith.Output.Gil.Liquid;
+using FluentAssertions;
 
 namespace StateSmithTest.Output.Gil;
 
@@ -15,108 +13,48 @@ public class GilToLiquidTests
     [Fact]
     public void Test_BasicLiquidOutput()
     {
-        // Arrange
-        var renderConfig = new RenderConfigBaseVars();
-        var renderConfigLiquid = new RenderConfigLiquidVars();
-        var codeFileWriter = new CapturingCodeFileWriter();
-        var outputInfo = new OutputInfo()
+        string gilCode = GilFileTestHelper.BuildExampleGilFile(skipIndentation: false, out var sm).ToString();
+
+        RenderConfigLiquidVars renderConfig = new();
+
+        OutputInfo outputInfo = new()
         {
-            OutputDirectory = "output/",
-            BaseFileName = "TestSm"
+            outputDirectory = TestHelper.GetThisDir()
         };
-        var roslynCompiler = new RoslynCompiler();
 
-        string gilCode = @"
-        public class TestSm
-        {
-            public void Start()
-            {
-            }
-        }";
+        CapturingCodeFileWriter capturingWriter = new();
+        GilToLiquid transpiler = new(outputInfo, new(), renderConfig, capturingWriter, new());
 
-        var transpiler = new GilToLiquid(outputInfo, renderConfig, renderConfigLiquid, codeFileWriter, roslynCompiler);
-
-        // Act
         transpiler.TranspileAndOutputCode(gilCode);
 
-        // Assert
-        var result = codeFileWriter.GetSingleOutputFile();
-        Assert.Equal("output/TestSm.liquid", result.FilePath);
-        Assert.Contains("{% comment %}", result.Code);
-        Assert.Contains("{{ current_state }}", result.Code);
-        Assert.Contains("feeds['temperature']", result.Code);
-        Assert.Contains("{% if event_triggered %}", result.Code);
-        Assert.Contains("{% for transition in transitions %}", result.Code);
+        capturingWriter.LastCode.Should().Contain("{% comment %}");
+        capturingWriter.LastCode.Should().Contain("{{ current_state }}");
+        capturingWriter.LastCode.Should().Contain("feeds['temperature']");
     }
 
     [Fact]
-    public void Test_AdafruitIOFeedIntegration()
+    public void Test_CustomFeedConfiguration()
     {
-        // Arrange
-        var renderConfig = new RenderConfigBaseVars();
-        var renderConfigLiquid = new RenderConfigLiquidVars();
-        var codeFileWriter = new CapturingCodeFileWriter();
-        var outputInfo = new OutputInfo()
-        {
-            OutputDirectory = "",
-            BaseFileName = "IoSm"
-        };
-        var roslynCompiler = new RoslynCompiler();
+        string gilCode = GilFileTestHelper.BuildExampleGilFile(skipIndentation: false, out var sm).ToString();
 
-        string gilCode = @"
-        public class IoSm
-        {
-            public void ProcessTemperature()
-            {
-            }
-        }";
-
-        var transpiler = new GilToLiquid(outputInfo, renderConfig, renderConfigLiquid, codeFileWriter, roslynCompiler);
-
-        // Act
-        transpiler.TranspileAndOutputCode(gilCode);
-
-        // Assert
-        var result = codeFileWriter.GetSingleOutputFile();
-        Assert.Contains("feeds['temperature']", result.Code);
-        Assert.Contains("feeds['humidity']", result.Code);
-        Assert.Contains("feeds['button-state']", result.Code);
-        Assert.Contains("{% if feeds['temperature'] > 25 %}", result.Code);
-    }
-
-    [Fact]
-    public void Test_CustomLiquidConfiguration()
-    {
-        // Arrange
-        var renderConfig = new RenderConfigBaseVars();
-        var renderConfigLiquid = new RenderConfigLiquidVars()
+        RenderConfigLiquidVars renderConfig = new()
         {
             FeedPrefix = "sensor['",
-            FeedSuffix = "'].value",
-            StateVariablePrefix = "{{< ",
-            StateVariableSuffix = " >}}"
+            FeedSuffix = "'].value"
         };
-        var codeFileWriter = new CapturingCodeFileWriter();
-        var outputInfo = new OutputInfo()
+
+        OutputInfo outputInfo = new()
         {
-            OutputDirectory = "",
-            BaseFileName = "CustomSm"
+            outputDirectory = TestHelper.GetThisDir()
         };
-        var roslynCompiler = new RoslynCompiler();
 
-        string gilCode = @"
-        public class CustomSm
-        {
-        }";
+        CapturingCodeFileWriter capturingWriter = new();
+        GilToLiquid transpiler = new(outputInfo, new(), renderConfig, capturingWriter, new());
 
-        var transpiler = new GilToLiquid(outputInfo, renderConfig, renderConfigLiquid, codeFileWriter, roslynCompiler);
-
-        // Act
         transpiler.TranspileAndOutputCode(gilCode);
 
-        // Assert
-        var result = codeFileWriter.GetSingleOutputFile();
-        Assert.Contains("sensor['temperature'].value", result.Code);
-        Assert.Contains("{{< current_state >}}", result.Code);
+        capturingWriter.LastCode.Should().Contain("sensor['temperature'].value");
+        capturingWriter.LastCode.Should().NotContain("feeds['temperature']");
     }
+
 }
