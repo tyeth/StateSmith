@@ -17,6 +17,7 @@ using StateSmith.Output.Gil;
 using StateSmith.Output.Algos.Balanced2;
 using StateSmith.Output.UserConfig.AutoVars;
 using StateSmith.Output.Gil.Cpp;
+using StateSmith.Output.Gil.Liquid;
 
 namespace StateSmith.Runner;
 

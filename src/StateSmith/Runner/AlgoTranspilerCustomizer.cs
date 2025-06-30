@@ -10,6 +10,7 @@ using StateSmith.Output.Gil.Java;
 using StateSmith.Output.Gil.JavaScript;
 using StateSmith.Output.Gil.Python;
 using StateSmith.Output.Gil.TypeScript;
+using StateSmith.Output.Gil.Liquid;
 using StateSmith.Output.UserConfig.AutoVars;
 using System;
 
@@ -144,6 +145,22 @@ public class AlgoTranspilerCustomizer
                     if (algorithmId != AlgorithmId.Balanced2)
                     {
                         throw new Exception("TypeScript transpiler currently only supports `AlgorithmId.Balanced2`. Please reply to https://github.com/StateSmith/StateSmith/issues/407 .");
+                    }
+                }
+                break;
+
+            case TranspilerId.Liquid:
+                {
+                    sp.AddSingletonT<IGilTranspiler, GilToLiquid>();
+                    sp.AddSingletonT<IExpansionVarsPathProvider, CSharpExpansionVarsPathProvider>();
+                    sp.AddSingletonT<NameMangler, CamelCaseNameMangler>();
+                    algoBalanced1Settings.skipClassIndentation = false;
+                    algoBalanced1Settings.varsStructAsClass = true;
+
+                    // Liquid templates support both algorithms
+                    if (algorithmId != AlgorithmId.Balanced1 && algorithmId != AlgorithmId.Balanced2)
+                    {
+                        throw new Exception("Liquid transpiler supports AlgorithmId.Balanced1 and AlgorithmId.Balanced2.");
                     }
                 }
                 break;
