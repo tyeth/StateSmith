@@ -1,0 +1,3 @@
+[submodule "examples/blockly-tool"]
+	path = examples/blockly-tool
+	url = https://github.com/tyeth/lorennorman_blockly-tool.git
