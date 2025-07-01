@@ -11,6 +11,7 @@ using StateSmith.Output.Gil.JavaScript;
 using StateSmith.Output.Gil.Python;
 using StateSmith.Output.Gil.TypeScript;
 using StateSmith.Output.Gil.Liquid;
+using StateSmith.Output.UserConfig;
 using StateSmith.Output.UserConfig.AutoVars;
 using System;
 
@@ -154,6 +155,7 @@ public class AlgoTranspilerCustomizer
                     sp.AddSingletonT<IGilTranspiler, GilToLiquid>();
                     sp.AddSingletonT<IExpansionVarsPathProvider, CSharpExpansionVarsPathProvider>();
                     sp.AddSingletonT<NameMangler, CamelCaseNameMangler>();
+                    sp.AddSingletonT<RenderConfigLiquidVars>(new RenderConfigLiquidVars());
                     algoBalanced1Settings.skipClassIndentation = false;
                     algoBalanced1Settings.varsStructAsClass = true;
 
